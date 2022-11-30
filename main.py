@@ -12,14 +12,24 @@ cursor = con.cursor()
 df = pd.read_excel('VendaCarros.xlsx')
 client = []
 car = df[['Fabricante', 'Modelo', 'Cor', 'Ano']].dropna(how='all').drop_duplicates().reset_index(drop=True).copy()
+fab = df[['Fabricante']].dropna(how='all').drop_duplicates().reset_index(drop=True).copy()
+cor = df[['Cor']].dropna(how='all').drop_duplicates().reset_index(drop=True).copy()
 
 def quote(val):
     if type(val) is str:
         return val.replace("'", r'\'')
     return val
 
+for k, v in fab.iterrows():
+    cursor.execute(f'''insert into fabricante (nome_fabricante) values ('{v['Fabricante']}');''')
+con.commit()
+
+for k, v in cor.iterrows():
+    cursor.execute(f'''insert into cor (nome_cor) values ('{v['Cor']}');''')
+con.commit()
+
 for k, v in car.iterrows():
-    cursor.execute(f'''insert into carros (Fabricante, modelo, cor, ano) values ('{v['Fabricante']}', '{v['Modelo']}', '{v['Cor']}', '{v['Ano']}');''')
+    cursor.execute(f'''insert into carros (Fabricante, modelo, cor, ano) values ('{car.loc[car['Fabricante'] == v['Fabricante']].index[0]+1}', '{v['Modelo']}', '{car.loc[car['Cor'] == v['Cor']].index[0]+1}', '{v['Ano']}');''')
 con.commit()
 
 
